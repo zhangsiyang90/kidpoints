@@ -303,6 +303,52 @@ body {
 /* Loading */
 .loading { text-align: center; padding: 40px; color: #ccc; font-size: 14px; }
 
+/* PIN Modal */
+.pin-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+.pin-overlay.show { display: flex; }
+.pin-box {
+  background: white;
+  border-radius: 24px;
+  padding: 28px 24px 20px;
+  width: 300px;
+  text-align: center;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.25);
+}
+.pin-title { font-size: 17px; font-weight: 800; margin-bottom: 6px; }
+.pin-subtitle { font-size: 13px; color: #999; margin-bottom: 20px; }
+.pin-dots { display: flex; justify-content: center; gap: 12px; margin-bottom: 20px; }
+.pin-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  background: white;
+  transition: all 0.15s;
+}
+.pin-dot.filled { background: #ff6b6b; border-color: #ff6b6b; }
+.pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.pin-key {
+  background: #f5f5f5;
+  border: none;
+  border-radius: 14px;
+  padding: 16px;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.pin-key:active { background: #ffe0e0; }
+.pin-key.del { background: #fff0f0; color: #ff6b6b; font-size: 16px; }
+.pin-key.cancel { background: #f5f5f5; color: #999; font-size: 14px; }
+.pin-error { color: #ff6b6b; font-size: 13px; margin-top: 8px; min-height: 18px; }
+
 /* Rule info */
 .rule-box {
   background: linear-gradient(135deg, #f8f9ff, #f0f4ff);
@@ -530,10 +576,91 @@ body {
 
 <div class="toast" id="toast"></div>
 
+<!-- PIN Modal -->
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-box">
+    <div class="pin-title">🔒 家长验证</div>
+    <div class="pin-subtitle">请输入 4 位家长密码</div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+    </div>
+    <div class="pin-keypad">
+      <button class="pin-key" onclick="pinInput('1')">1</button>
+      <button class="pin-key" onclick="pinInput('2')">2</button>
+      <button class="pin-key" onclick="pinInput('3')">3</button>
+      <button class="pin-key" onclick="pinInput('4')">4</button>
+      <button class="pin-key" onclick="pinInput('5')">5</button>
+      <button class="pin-key" onclick="pinInput('6')">6</button>
+      <button class="pin-key" onclick="pinInput('7')">7</button>
+      <button class="pin-key" onclick="pinInput('8')">8</button>
+      <button class="pin-key" onclick="pinInput('9')">9</button>
+      <button class="pin-key cancel" onclick="pinCancel()">取消</button>
+      <button class="pin-key" onclick="pinInput('0')">0</button>
+      <button class="pin-key del" onclick="pinDelete()">⌫</button>
+    </div>
+    <div class="pin-error" id="pinError"></div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://hqtpatpjwefiymtmufec.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxdHBhdHBqd2VmaXltdG11ZmVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNDg0NzUsImV4cCI6MjA4OTgyNDQ3NX0.VIfw5k-eOnJeBImwAfkh5L8KrHVwaqv2QyI1d5Vv6lI';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── PIN 系统 ──────────────────────────────────────────────────
+const DEFAULT_PIN = '1234';
+function getPin() { return localStorage.getItem('kidapp_pin') || DEFAULT_PIN; }
+
+let pinBuffer = '';
+let pinCallback = null;
+
+function requirePin(callback) {
+  pinBuffer = '';
+  pinCallback = callback;
+  updatePinDots();
+  document.getElementById('pinError').textContent = '';
+  document.getElementById('pinOverlay').classList.add('show');
+}
+
+function pinInput(digit) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += digit;
+  updatePinDots();
+  if (pinBuffer.length === 4) {
+    setTimeout(() => {
+      if (pinBuffer === getPin()) {
+        document.getElementById('pinOverlay').classList.remove('show');
+        if (pinCallback) pinCallback();
+        pinCallback = null;
+      } else {
+        document.getElementById('pinError').textContent = '密码错误，请重试';
+        pinBuffer = '';
+        updatePinDots();
+      }
+    }, 150);
+  }
+}
+
+function pinDelete() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updatePinDots();
+  document.getElementById('pinError').textContent = '';
+}
+
+function pinCancel() {
+  document.getElementById('pinOverlay').classList.remove('show');
+  pinCallback = null;
+  pinBuffer = '';
+}
+
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('d' + i).classList.toggle('filled', i < pinBuffer.length);
+  }
+}
 
 const DAYS = ['周日','周一','周二','周三','周四','周五','周六'];
 const DAY_TASKS = {
@@ -611,56 +738,68 @@ function getTodayBtns(dow) {
   return map[dow] || '<div style="color:#999;font-size:13px;padding:8px;">今天没有固定任务，继续加油！</div>';
 }
 
-async function addPoints(pts, category, type) {
+async function _doAddPoints(pts, category, type) {
   const { error } = await sb.from('kid_points').insert({ type, category, points: pts, note: '' });
   if (error) { showToast('❌ 出错了，请重试'); return; }
   totalPoints += (type === 'earn' ? pts : -pts);
   document.getElementById('totalPoints').textContent = totalPoints;
-  showToast(`🌟 +${pts}分！太棒了！`);
+  showToast(type === 'earn' ? `🌟 +${pts}分！太棒了！` : `✅ 兑换成功！`);
 }
 
-async function addVarPoints(inputId, perUnit, category) {
+function addPoints(pts, category, type) {
+  requirePin(() => _doAddPoints(pts, category, type));
+}
+
+function addVarPoints(inputId, perUnit, category) {
   const val = parseInt(document.getElementById(inputId).value);
   if (!val || val <= 0) { showToast('请输入数量'); return; }
   const pts = val * perUnit;
-  await addPoints(pts, `${category}（${val}个×${perUnit}分）`, 'earn');
-  document.getElementById(inputId).value = '';
+  requirePin(() => {
+    _doAddPoints(pts, `${category}（${val}个×${perUnit}分）`, 'earn');
+    document.getElementById(inputId).value = '';
+  });
 }
 
-async function addVarPointsFixed(inputId, maxPts, category) {
+function addVarPointsFixed(inputId, maxPts, category) {
   const val = parseInt(document.getElementById(inputId).value);
-  if (val === undefined || val < 0 || isNaN(val)) { showToast('请输入分数'); return; }
+  if (isNaN(val) || val < 0) { showToast('请输入分数'); return; }
   if (val > maxPts) { showToast(`最高 ${maxPts} 分`); return; }
-  await addPoints(val, `${category}（${val}/${maxPts}分）`, 'earn');
-  document.getElementById(inputId).value = '';
+  requirePin(() => {
+    _doAddPoints(val, `${category}（${val}/${maxPts}分）`, 'earn');
+    document.getElementById(inputId).value = '';
+  });
 }
 
-async function redeemTV() {
+function redeemTV() {
   const hours = parseInt(document.getElementById('tvHoursInput').value);
   if (!hours || hours <= 0) { showToast('请输入小时数'); return; }
   const pts = hours * 5;
   if (totalPoints < pts) { showToast(`积分不够！需要 ${pts} 分`); return; }
-  const { error } = await sb.from('kid_points').insert({ type: 'redeem', category: `看电视${hours}小时`, points: pts, note: '' });
-  if (error) { showToast('❌ 出错了'); return; }
-  totalPoints -= pts;
-  document.getElementById('totalPoints').textContent = totalPoints;
-  document.getElementById('tvHoursInput').value = '';
-  showToast(`📺 已兑换！多看 ${hours} 小时电视 🎉`);
+  requirePin(async () => {
+    const { error } = await sb.from('kid_points').insert({ type: 'redeem', category: `看电视${hours}小时`, points: pts, note: '' });
+    if (error) { showToast('❌ 出错了'); return; }
+    totalPoints -= pts;
+    document.getElementById('totalPoints').textContent = totalPoints;
+    document.getElementById('tvHoursInput').value = '';
+    showToast(`📺 已兑换！多看 ${hours} 小时电视 🎉`);
+  });
 }
 
-async function customRedeem() {
+function customRedeem() {
   const name = document.getElementById('customRedeemName').value.trim();
   const pts = parseInt(document.getElementById('customRedeemPts').value);
   if (!name) { showToast('请输入兑换内容'); return; }
   if (!pts || pts <= 0) { showToast('请输入分数'); return; }
   if (totalPoints < pts) { showToast(`积分不够！需要 ${pts} 分`); return; }
-  const { error } = await sb.from('kid_points').insert({ type: 'redeem', category: name, points: pts, note: '' });
-  if (error) { showToast('❌ 出错了'); return; }
-  totalPoints -= pts;
-  document.getElementById('totalPoints').textContent = totalPoints;
-  document.getElementById('customRedeemName').value = '';
-  document.getElementById('customRedeemPts').value = '';
-  showToast(`🎁 已兑换 ${name}！`);
+  requirePin(async () => {
+    const { error } = await sb.from('kid_points').insert({ type: 'redeem', category: name, points: pts, note: '' });
+    if (error) { showToast('❌ 出错了'); return; }
+    totalPoints -= pts;
+    document.getElementById('totalPoints').textContent = totalPoints;
+    document.getElementById('customRedeemName').value = '';
+    document.getElementById('customRedeemPts').value = '';
+    showToast(`🎁 已兑换 ${name}！`);
+  });
 }
 
 async function loadHistory() {
