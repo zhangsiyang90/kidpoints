@@ -221,6 +221,43 @@ body {
 }
 .redeem-btn:active { opacity: 0.85; }
 
+/* Timer */
+.timer-card {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border-radius: 20px;
+  padding: 20px 16px;
+  margin-bottom: 14px;
+  text-align: center;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.2);
+}
+.timer-title { color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 4px; }
+.timer-free-hint { color: #feca57; font-size: 13px; font-weight: 600; margin-bottom: 14px; }
+.timer-display {
+  font-size: 54px;
+  font-weight: 900;
+  color: white;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 2px;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  margin-bottom: 16px;
+  text-shadow: 0 0 20px rgba(255,255,255,0.3);
+}
+.timer-display.running { color: #43e97b; text-shadow: 0 0 20px rgba(67,233,123,0.4); }
+.timer-display.paused  { color: #feca57; text-shadow: 0 0 20px rgba(254,202,87,0.4); }
+.timer-display.done    { color: #ff6b6b; text-shadow: 0 0 20px rgba(255,107,107,0.4); }
+.timer-btns { display: flex; gap: 10px; justify-content: center; }
+.timer-btn {
+  border: none; border-radius: 12px;
+  padding: 10px 24px;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+}
+.timer-btn.start  { background: #43e97b; color: #1a4030; flex: 2; }
+.timer-btn.pause  { background: #feca57; color: #5a3a00; flex: 2; }
+.timer-btn.reset  { background: rgba(255,255,255,0.15); color: white; flex: 1; }
+.timer-done { color: #ff6b6b; font-size: 14px; font-weight: 700; margin-top: 12px; animation: blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
 /* Custom redeem */
 .custom-redeem {
   background: white;
@@ -522,6 +559,19 @@ body {
 
 <!-- 兑换页 -->
 <div id="page-redeem" class="page">
+  <!-- 计时器 -->
+  <div class="timer-card" id="timerCard">
+    <div class="timer-title">📺 今日免费看电视</div>
+    <div class="timer-free-hint" id="timerFreeHint">今天免费 1 小时</div>
+    <div class="timer-display" id="timerDisplay">01:00:00</div>
+    <div class="timer-btns">
+      <button class="timer-btn start" id="timerStartBtn" onclick="timerStart()">▶ 开始</button>
+      <button class="timer-btn pause" id="timerPauseBtn" onclick="timerPause()" style="display:none">⏸ 暂停</button>
+      <button class="timer-btn reset" onclick="timerReset()">↺ 重置</button>
+    </div>
+    <div class="timer-done" id="timerDone" style="display:none">⏰ 时间到啦！今天免费时间用完了</div>
+  </div>
+
   <!-- 免费额度提示 -->
   <div class="free-tv">
     <span class="icon">📺</span>
@@ -916,7 +966,88 @@ function showToast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
+// ── 计时器 ────────────────────────────────────────────────────
+let timerRemaining = 0;
+let timerInterval = null;
+let timerRunning = false;
+
+function getFreeSecs() {
+  return new Date().getDay() === 0 ? 3 * 3600 : 3600;
+}
+
+function timerInit() {
+  const saved = localStorage.getItem('kidtimer_date');
+  const today = new Date().toDateString();
+  if (saved !== today) {
+    localStorage.setItem('kidtimer_date', today);
+    localStorage.removeItem('kidtimer_remaining');
+    localStorage.removeItem('kidtimer_running');
+  }
+  const savedSecs = localStorage.getItem('kidtimer_remaining');
+  timerRemaining = savedSecs !== null ? parseInt(savedSecs) : getFreeSecs();
+  updateTimerDisplay();
+  document.getElementById('timerFreeHint').textContent =
+    new Date().getDay() === 0 ? '今天（周日）免费 3 小时 🎉' : '今天免费 1 小时';
+  if (localStorage.getItem('kidtimer_running') === '1' && timerRemaining > 0) timerStart();
+}
+
+function timerStart() {
+  if (timerRemaining <= 0) return;
+  timerRunning = true;
+  localStorage.setItem('kidtimer_running', '1');
+  document.getElementById('timerStartBtn').style.display = 'none';
+  document.getElementById('timerPauseBtn').style.display = '';
+  document.getElementById('timerDisplay').className = 'timer-display running';
+  timerInterval = setInterval(() => {
+    timerRemaining--;
+    localStorage.setItem('kidtimer_remaining', timerRemaining);
+    updateTimerDisplay();
+    if (timerRemaining <= 0) {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      localStorage.setItem('kidtimer_running', '0');
+      document.getElementById('timerDisplay').className = 'timer-display done';
+      document.getElementById('timerPauseBtn').style.display = 'none';
+      document.getElementById('timerStartBtn').style.display = '';
+      document.getElementById('timerDone').style.display = 'block';
+      // 震动提醒（手机）
+      if (navigator.vibrate) navigator.vibrate([500,200,500,200,500]);
+    }
+  }, 1000);
+}
+
+function timerPause() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  localStorage.setItem('kidtimer_running', '0');
+  document.getElementById('timerPauseBtn').style.display = 'none';
+  document.getElementById('timerStartBtn').style.display = '';
+  document.getElementById('timerDisplay').className = 'timer-display paused';
+}
+
+function timerReset() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerRemaining = getFreeSecs();
+  localStorage.setItem('kidtimer_remaining', timerRemaining);
+  localStorage.setItem('kidtimer_running', '0');
+  document.getElementById('timerPauseBtn').style.display = 'none';
+  document.getElementById('timerStartBtn').style.display = '';
+  document.getElementById('timerDisplay').className = 'timer-display';
+  document.getElementById('timerDone').style.display = 'none';
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  const h = Math.floor(timerRemaining / 3600);
+  const m = Math.floor((timerRemaining % 3600) / 60);
+  const s = timerRemaining % 60;
+  document.getElementById('timerDisplay').textContent =
+    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
 init();
+timerInit();
 </script>
 </body>
 </html>
