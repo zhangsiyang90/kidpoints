@@ -417,6 +417,21 @@ body {
   <div class="section-title">今日任务</div>
   <div id="todayTaskBtns"></div>
 
+  <!-- 其他加分 -->
+  <div class="var-card">
+    <div class="var-card-head">
+      <span class="var-card-icon">✨</span>
+      <span class="var-card-title">其他加分</span>
+    </div>
+    <div class="var-card-desc">填写原因和分值，由家长决定</div>
+    <input class="var-input" id="otherReasonInput" type="text" placeholder="加分原因（如：帮妈妈做家务）" style="width:100%;text-align:left;padding:10px 14px;font-size:14px;margin-bottom:8px;border-radius:12px;border:2px solid #eee;">
+    <div class="var-row">
+      <input class="var-input" id="otherPtsInput" type="number" min="1" max="50" placeholder="0">
+      <span class="var-unit">分</span>
+      <button class="var-submit" onclick="submitOther()">确认</button>
+    </div>
+  </div>
+
   <div class="section-title">所有任务</div>
   <div class="task-grid">
     <button class="task-btn purple" onclick="addPoints(5,'完成英语作业','earn')">
@@ -697,6 +712,18 @@ function selectBehavior(btn, val) {
   document.querySelectorAll('.beh-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
   selectedBehavior = val;
+}
+
+function submitOther() {
+  const reason = document.getElementById('otherReasonInput').value.trim();
+  const pts = parseInt(document.getElementById('otherPtsInput').value);
+  if (!reason) { showToast('请填写加分原因'); return; }
+  if (!pts || pts <= 0) { showToast('请输入分值'); return; }
+  requirePin(() => {
+    _doAddPoints(pts, `其他：${reason}`, 'earn');
+    document.getElementById('otherReasonInput').value = '';
+    document.getElementById('otherPtsInput').value = '';
+  });
 }
 
 function submitBehavior() {
