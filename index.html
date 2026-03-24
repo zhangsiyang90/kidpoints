@@ -358,6 +358,25 @@ body {
 }
 .pin-error { color: #ff6b6b; font-size: 13px; margin-top: 10px; min-height: 18px; }
 
+/* Behavior score */
+.behavior-opts { display: flex; gap: 8px; margin-top: 4px; }
+.beh-btn {
+  flex: 1;
+  background: #f5f5f5;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 10px 4px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.4;
+  color: #555;
+  transition: all 0.15s;
+}
+.beh-btn span { display: block; font-size: 18px; }
+.beh-btn.selected { background: #fff0f0; border-color: #ff6b6b; color: #ff6b6b; }
+
 /* Rule info */
 .rule-box {
   background: linear-gradient(135deg, #f8f9ff, #f0f4ff);
@@ -418,6 +437,23 @@ body {
     <button class="task-btn gold" onclick="addPoints(2,'练习册一页','earn')">
       <span class="pts">+2</span>练习册/页
     </button>
+  </div>
+
+  <!-- 今日表现分 -->
+  <div class="var-card">
+    <div class="var-card-head">
+      <span class="var-card-icon">😊</span>
+      <span class="var-card-title">今日表现分</span>
+    </div>
+    <div class="var-card-desc">由家长评分，1-5分</div>
+    <div class="behavior-opts">
+      <button class="beh-btn" onclick="selectBehavior(this,1)">1<span>😐</span></button>
+      <button class="beh-btn" onclick="selectBehavior(this,2)">2<span>🙂</span></button>
+      <button class="beh-btn" onclick="selectBehavior(this,3)">3<span>😊</span></button>
+      <button class="beh-btn" onclick="selectBehavior(this,4)">4<span>😄</span></button>
+      <button class="beh-btn" onclick="selectBehavior(this,5)">5<span>🌟</span></button>
+    </div>
+    <button class="var-submit" style="width:100%;margin-top:10px;" onclick="submitBehavior()">确认加分</button>
   </div>
 
   <!-- 听写/背单词 (variable) -->
@@ -655,6 +691,22 @@ const DAY_TASKS = {
 };
 
 let totalPoints = 0;
+let selectedBehavior = 0;
+
+function selectBehavior(btn, val) {
+  document.querySelectorAll('.beh-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedBehavior = val;
+}
+
+function submitBehavior() {
+  if (!selectedBehavior) { showToast('请先选择分值'); return; }
+  requirePin(() => {
+    _doAddPoints(selectedBehavior, `今日表现分（${selectedBehavior}分）`, 'earn');
+    document.querySelectorAll('.beh-btn').forEach(b => b.classList.remove('selected'));
+    selectedBehavior = 0;
+  });
+}
 
 // 初始化
 async function init() {
