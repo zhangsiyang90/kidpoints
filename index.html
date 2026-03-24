@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>⭐ 积分乐园</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+  background: #fff9f0;
+  max-width: 480px; margin: 0 auto; min-height: 100vh;
+  color: #333;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+  padding: 28px 16px 20px;
+  text-align: center;
+  border-radius: 0 0 28px 28px;
+  box-shadow: 0 4px 20px rgba(255,107,107,0.35);
+  position: relative;
+}
+.header-title {
+  color: white;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.header-sub {
+  color: rgba(255,255,255,0.85);
+  font-size: 12px;
+  margin-top: 4px;
+}
+.points-display {
+  background: white;
+  border-radius: 20px;
+  padding: 14px 32px;
+  display: inline-block;
+  margin-top: 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+.points-number {
+  font-size: 56px;
+  font-weight: 900;
+  color: #ff6b6b;
+  line-height: 1;
+}
+.points-unit { font-size: 20px; color: #ffaa00; font-weight: 700; }
+.points-label {
+  font-size: 12px;
+  color: #bbb;
+  margin-top: 4px;
+}
+
+/* Nav */
+.nav {
+  display: flex;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.nav-btn {
+  flex: 1;
+  padding: 12px 6px;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  background: white;
+  color: #999;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  font-weight: 600;
+}
+.nav-btn.active {
+  color: #ff6b6b;
+  border-bottom-color: #ff6b6b;
+}
+
+/* Page */
+.page { display: none; padding: 16px 14px; }
+.page.active { display: block; }
+
+/* Section title */
+.section-title {
+  font-size: 12px;
+  color: #aaa;
+  margin: 16px 0 8px 2px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Today banner */
+.today-banner {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 16px;
+  padding: 14px 16px;
+  color: white;
+  margin-bottom: 14px;
+}
+.today-banner .day { font-size: 13px; opacity: 0.85; margin-bottom: 2px; }
+.today-banner .tasks-hint { font-size: 15px; font-weight: 700; }
+
+/* Free TV banner */
+.free-tv {
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  color: #1a5c3a;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.free-tv .icon { font-size: 20px; }
+
+/* Task buttons */
+.task-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+.task-btn {
+  border: none;
+  border-radius: 16px;
+  padding: 16px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.4;
+  color: white;
+  transition: transform 0.12s, box-shadow 0.12s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+.task-btn:active { transform: scale(0.94); box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+.task-btn .pts { font-size: 22px; font-weight: 900; display: block; margin-bottom: 2px; }
+.task-btn.purple { background: linear-gradient(135deg, #667eea, #764ba2); }
+.task-btn.green  { background: linear-gradient(135deg, #56ab2f, #a8e063); }
+.task-btn.orange { background: linear-gradient(135deg, #f7971e, #ffd200); color: #5a3a00; }
+.task-btn.pink   { background: linear-gradient(135deg, #ee0979, #ff6a00); }
+.task-btn.blue   { background: linear-gradient(135deg, #2193b0, #6dd5ed); }
+.task-btn.teal   { background: linear-gradient(135deg, #11998e, #38ef7d); color: #1a4030; }
+.task-btn.red    { background: linear-gradient(135deg, #cb2d3e, #ef473a); }
+.task-btn.gold   { background: linear-gradient(135deg, #f09819, #edde5d); color: #5a3a00; }
+
+/* Variable task card */
+.var-card {
+  background: white;
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+}
+.var-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.var-card-icon { font-size: 22px; }
+.var-card-title { font-size: 15px; font-weight: 700; }
+.var-card-desc { font-size: 12px; color: #999; margin-bottom: 10px; }
+.var-row { display: flex; gap: 8px; align-items: center; }
+.var-input {
+  flex: 1;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 18px;
+  text-align: center;
+  font-weight: 700;
+  color: #333;
+}
+.var-input:focus { outline: none; border-color: #ff6b6b; }
+.var-unit { font-size: 13px; color: #999; min-width: 28px; }
+.var-submit {
+  background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(255,107,107,0.35);
+}
+.var-submit:active { opacity: 0.85; }
+
+/* Redeem section */
+.redeem-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+}
+.redeem-card-title { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+.redeem-card-desc { font-size: 13px; color: #888; margin-bottom: 14px; line-height: 1.5; }
+.redeem-row { display: flex; gap: 10px; align-items: center; }
+.redeem-input {
+  flex: 1;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 18px;
+  text-align: center;
+  font-weight: 700;
+}
+.redeem-input:focus { outline: none; border-color: #feca57; }
+.redeem-btn {
+  background: linear-gradient(135deg, #f7971e, #ffd200);
+  color: #5a3a00;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(247,151,30,0.35);
+}
+.redeem-btn:active { opacity: 0.85; }
+
+/* Custom redeem */
+.custom-redeem {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+}
+.custom-redeem-title { font-size: 16px; font-weight: 800; margin-bottom: 12px; }
+.custom-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.custom-name-input {
+  flex: 2;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+.custom-pts-input {
+  flex: 1;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 16px;
+  text-align: center;
+  font-weight: 700;
+}
+.custom-name-input:focus, .custom-pts-input:focus { outline: none; border-color: #ee0979; }
+.custom-submit {
+  background: linear-gradient(135deg, #ee0979, #ff6a00);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* History */
+.history-item {
+  background: white;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+.hi-left { flex: 1; }
+.hi-name { font-size: 14px; font-weight: 700; }
+.hi-time { font-size: 11px; color: #bbb; margin-top: 3px; }
+.hi-pts { font-size: 22px; font-weight: 900; }
+.hi-pts.earn  { color: #56ab2f; }
+.hi-pts.earn::before  { content: '+'; }
+.hi-pts.redeem { color: #ee0979; }
+.hi-pts.redeem::before { content: '-'; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-120px);
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 12px 28px;
+  border-radius: 30px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+  z-index: 999;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* Loading */
+.loading { text-align: center; padding: 40px; color: #ccc; font-size: 14px; }
+
+/* Rule info */
+.rule-box {
+  background: linear-gradient(135deg, #f8f9ff, #f0f4ff);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  border-left: 4px solid #667eea;
+}
+.rule-box h4 { font-size: 14px; color: #667eea; margin-bottom: 8px; }
+.rule-box ul { font-size: 13px; color: #555; line-height: 2; padding-left: 16px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">⭐ 积分乐园 ⭐</div>
+  <div class="header-sub">好好学习，天天向上！</div>
+  <div class="points-display">
+    <div class="points-number" id="totalPoints">--</div>
+    <div class="points-label">当前积分 <span class="points-unit">★</span></div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="switchPage('earn')">🎯 赚积分</button>
+  <button class="nav-btn" onclick="switchPage('redeem')">🎁 兑换</button>
+  <button class="nav-btn" onclick="switchPage('history')">📋 记录</button>
+  <button class="nav-btn" onclick="switchPage('rules')">📖 规则</button>
+</div>
+
+<!-- 赚积分页 -->
+<div id="page-earn" class="page active">
+  <div class="today-banner" id="todayBanner">
+    <div class="day" id="todayDate">今天是...</div>
+    <div class="tasks-hint" id="todayTasks">加载中...</div>
+  </div>
+
+  <div class="section-title">今日任务</div>
+  <div id="todayTaskBtns"></div>
+
+  <div class="section-title">所有任务</div>
+  <div class="task-grid">
+    <button class="task-btn purple" onclick="addPoints(5,'完成英语作业','earn')">
+      <span class="pts">+5</span>完成英语作业
+    </button>
+    <button class="task-btn blue" onclick="addPoints(5,'完成语文作业','earn')">
+      <span class="pts">+5</span>完成语文作业
+    </button>
+    <button class="task-btn teal" onclick="addPoints(10,'语文课','earn')">
+      <span class="pts">+10</span>语文课 ✓
+    </button>
+    <button class="task-btn pink" onclick="addPoints(10,'英语课','earn')">
+      <span class="pts">+10</span>英语课 ✓
+    </button>
+    <button class="task-btn green" onclick="addPoints(2,'练字','earn')">
+      <span class="pts">+2</span>练字 ✍️
+    </button>
+    <button class="task-btn gold" onclick="addPoints(2,'练习册一页','earn')">
+      <span class="pts">+2</span>练习册/页
+    </button>
+  </div>
+
+  <!-- 听写/背单词 (variable) -->
+  <div class="var-card">
+    <div class="var-card-head">
+      <span class="var-card-icon">📝</span>
+      <span class="var-card-title">周二听写 · 背单词</span>
+    </div>
+    <div class="var-card-desc">每答对一个单词 +1分，输入答对数量</div>
+    <div class="var-row">
+      <input class="var-input" id="spellingInput" type="number" min="0" max="50" placeholder="0">
+      <span class="var-unit">个词</span>
+      <button class="var-submit" onclick="addVarPoints('spellingInput', 1, '听写背单词')">确认</button>
+    </div>
+  </div>
+
+  <!-- 练习册多页 -->
+  <div class="var-card">
+    <div class="var-card-head">
+      <span class="var-card-icon">📚</span>
+      <span class="var-card-title">练习册（多页）</span>
+    </div>
+    <div class="var-card-desc">周五/周六，每完成一页 +2分</div>
+    <div class="var-row">
+      <input class="var-input" id="workbookInput" type="number" min="1" max="20" placeholder="0">
+      <span class="var-unit">页</span>
+      <button class="var-submit" onclick="addVarPoints('workbookInput', 2, '练习册')">确认</button>
+    </div>
+  </div>
+
+  <!-- 体育练习 -->
+  <div class="var-card">
+    <div class="var-card-head">
+      <span class="var-card-icon">🏃</span>
+      <span class="var-card-title">周日体育练习</span>
+    </div>
+    <div class="var-card-desc">按成绩打分，满分 10 分</div>
+    <div class="var-row">
+      <input class="var-input" id="sportsInput" type="number" min="0" max="10" placeholder="0">
+      <span class="var-unit">分</span>
+      <button class="var-submit" onclick="addVarPointsFixed('sportsInput', 10, '体育练习')">确认</button>
+    </div>
+  </div>
+
+  <!-- 额外听写 -->
+  <div class="var-card">
+    <div class="var-card-head">
+      <span class="var-card-icon">🏫</span>
+      <span class="var-card-title">学校额外听写</span>
+    </div>
+    <div class="var-card-desc">满分 10 分，酌情打分</div>
+    <div class="var-row">
+      <input class="var-input" id="extraDictInput" type="number" min="0" max="10" placeholder="0">
+      <span class="var-unit">分</span>
+      <button class="var-submit" onclick="addVarPointsFixed('extraDictInput', 10, '额外听写')">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- 兑换页 -->
+<div id="page-redeem" class="page">
+  <!-- 免费额度提示 -->
+  <div class="free-tv">
+    <span class="icon">📺</span>
+    <div>
+      <div>今日免费电视：<strong id="freeTvToday">1小时</strong></div>
+      <div style="font-size:12px;opacity:0.8;margin-top:2px;">周日免费3小时，其余每天1小时</div>
+    </div>
+  </div>
+
+  <!-- 兑换电视时间 -->
+  <div class="redeem-card">
+    <div class="redeem-card-title">📺 兑换额外看电视</div>
+    <div class="redeem-card-desc">超出免费额度之外，每小时花费 <strong>5分</strong></div>
+    <div class="redeem-row">
+      <input class="redeem-input" id="tvHoursInput" type="number" min="1" max="10" placeholder="1">
+      <span style="font-size:13px;color:#999;min-width:28px;">小时</span>
+      <button class="redeem-btn" onclick="redeemTV()">🎉 兑换</button>
+    </div>
+  </div>
+
+  <!-- 自定义兑换 -->
+  <div class="custom-redeem">
+    <div class="custom-redeem-title">🎁 其他兑换（玩具/零食等）</div>
+    <div class="custom-row">
+      <input class="custom-name-input" id="customRedeemName" placeholder="兑换内容（如：买玩具）">
+      <input class="custom-pts-input" id="customRedeemPts" type="number" min="1" placeholder="分数">
+    </div>
+    <button class="custom-submit" onclick="customRedeem()">确认兑换</button>
+  </div>
+
+  <!-- 积分说明 -->
+  <div class="rule-box">
+    <h4>💡 兑换规则</h4>
+    <ul>
+      <li>每天自带 1 小时免费看电视</li>
+      <li>周日自带 3 小时免费看电视</li>
+      <li>超出免费时间：5分 = 1小时</li>
+      <li>玩具/其他：由爸爸妈妈定价</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 记录页 -->
+<div id="page-history" class="page">
+  <div id="historyList"><div class="loading">加载中...</div></div>
+</div>
+
+<!-- 规则页 -->
+<div id="page-rules" class="page">
+  <div class="rule-box">
+    <h4>📅 周一</h4>
+    <ul>
+      <li>完成英语作业 +5分</li>
+      <li>背单词（周二听写，每对一词 +1分）</li>
+    </ul>
+  </div>
+  <div class="rule-box">
+    <h4>📅 周二</h4>
+    <ul>
+      <li>完成语文作业 +5分</li>
+    </ul>
+  </div>
+  <div class="rule-box">
+    <h4>📅 周三</h4>
+    <ul>
+      <li>语文课 +10分</li>
+    </ul>
+  </div>
+  <div class="rule-box">
+    <h4>📅 周四</h4>
+    <ul>
+      <li>英语课 +10分</li>
+    </ul>
+  </div>
+  <div class="rule-box">
+    <h4>📅 周五 / 周六</h4>
+    <ul>
+      <li>练习册，每完成一页 +2分</li>
+    </ul>
+  </div>
+  <div class="rule-box">
+    <h4>📅 周日</h4>
+    <ul>
+      <li>体育练习，按成绩打分，满分 10 分</li>
+      <li>看电视免费 3 小时</li>
+    </ul>
+  </div>
+  <div class="rule-box">
+    <h4>⭐ 随时可得</h4>
+    <ul>
+      <li>练字 +2分</li>
+      <li>学校额外听写，满分 10 分，酌情打分</li>
+    </ul>
+  </div>
+  <div class="rule-box">
+    <h4>🎁 兑换</h4>
+    <ul>
+      <li>每天 1 小时免费电视（周日 3 小时）</li>
+      <li>额外电视时间：5分 = 1小时</li>
+      <li>玩具/其他由爸妈定价</li>
+    </ul>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://hqtpatpjwefiymtmufec.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxdHBhdHBqd2VmaXltdG11ZmVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNDg0NzUsImV4cCI6MjA4OTgyNDQ3NX0.VIfw5k-eOnJeBImwAfkh5L8KrHVwaqv2QyI1d5Vv6lI';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const DAYS = ['周日','周一','周二','周三','周四','周五','周六'];
+const DAY_TASKS = {
+  1: { label: '周一 · 英语日', tasks: ['完成英语作业（+5分）', '提前背单词，周二听写按答对数计分'] },
+  2: { label: '周二 · 语文日 + 听写日', tasks: ['完成语文作业（+5分）', '听写测验（每答对一词+1分）'] },
+  3: { label: '周三 · 语文课', tasks: ['语文课（+10分）'] },
+  4: { label: '周四 · 英语课', tasks: ['英语课（+10分）'] },
+  5: { label: '周五 · 练习册', tasks: ['每完成一页练习册 +2分'] },
+  6: { label: '周六 · 练习册', tasks: ['每完成一页练习册 +2分'] },
+  0: { label: '周日 · 体育日 🏃', tasks: ['体育练习（满分10分）', '看电视今日免费3小时！🎉'] },
+};
+
+let totalPoints = 0;
+
+// 初始化
+async function init() {
+  loadPoints();
+  setupToday();
+}
+
+async function loadPoints() {
+  const { data, error } = await sb.from('kid_points').select('type,points');
+  if (error) { console.error(error); return; }
+  let total = 0;
+  data.forEach(r => {
+    if (r.type === 'earn') total += r.points;
+    else total -= r.points;
+  });
+  totalPoints = total;
+  document.getElementById('totalPoints').textContent = totalPoints;
+}
+
+function setupToday() {
+  const now = new Date();
+  const dow = now.getDay();
+  const dateStr = `${now.getMonth()+1}月${now.getDate()}日 ${DAYS[dow]}`;
+  document.getElementById('todayDate').textContent = dateStr;
+
+  const info = DAY_TASKS[dow];
+  document.getElementById('todayTasks').textContent = info.label;
+
+  // 今日任务按钮
+  const container = document.getElementById('todayTaskBtns');
+  const todayBtns = getTodayBtns(dow);
+  container.innerHTML = `<div class="task-grid">${todayBtns}</div>`;
+
+  // 免费电视
+  document.getElementById('freeTvToday').textContent = dow === 0 ? '3小时 🎉' : '1小时';
+}
+
+function getTodayBtns(dow) {
+  const map = {
+    1: `
+      <button class="task-btn purple" onclick="addPoints(5,'完成英语作业','earn')"><span class="pts">+5</span>完成英语作业</button>
+    `,
+    2: `
+      <button class="task-btn blue" onclick="addPoints(5,'完成语文作业','earn')"><span class="pts">+5</span>完成语文作业</button>
+    `,
+    3: `
+      <button class="task-btn teal" onclick="addPoints(10,'语文课','earn')"><span class="pts">+10</span>语文课 ✓</button>
+    `,
+    4: `
+      <button class="task-btn pink" onclick="addPoints(10,'英语课','earn')"><span class="pts">+10</span>英语课 ✓</button>
+    `,
+    5: `
+      <button class="task-btn gold" onclick="addPoints(2,'练习册一页','earn')"><span class="pts">+2</span>练习册/页</button>
+    `,
+    6: `
+      <button class="task-btn gold" onclick="addPoints(2,'练习册一页','earn')"><span class="pts">+2</span>练习册/页</button>
+    `,
+    0: `
+      <button class="task-btn red" onclick="switchPage('earn')"><span class="pts">🏃</span>体育打分↓</button>
+    `,
+  };
+  return map[dow] || '<div style="color:#999;font-size:13px;padding:8px;">今天没有固定任务，继续加油！</div>';
+}
+
+async function addPoints(pts, category, type) {
+  const { error } = await sb.from('kid_points').insert({ type, category, points: pts, note: '' });
+  if (error) { showToast('❌ 出错了，请重试'); return; }
+  totalPoints += (type === 'earn' ? pts : -pts);
+  document.getElementById('totalPoints').textContent = totalPoints;
+  showToast(`🌟 +${pts}分！太棒了！`);
+}
+
+async function addVarPoints(inputId, perUnit, category) {
+  const val = parseInt(document.getElementById(inputId).value);
+  if (!val || val <= 0) { showToast('请输入数量'); return; }
+  const pts = val * perUnit;
+  await addPoints(pts, `${category}（${val}个×${perUnit}分）`, 'earn');
+  document.getElementById(inputId).value = '';
+}
+
+async function addVarPointsFixed(inputId, maxPts, category) {
+  const val = parseInt(document.getElementById(inputId).value);
+  if (val === undefined || val < 0 || isNaN(val)) { showToast('请输入分数'); return; }
+  if (val > maxPts) { showToast(`最高 ${maxPts} 分`); return; }
+  await addPoints(val, `${category}（${val}/${maxPts}分）`, 'earn');
+  document.getElementById(inputId).value = '';
+}
+
+async function redeemTV() {
+  const hours = parseInt(document.getElementById('tvHoursInput').value);
+  if (!hours || hours <= 0) { showToast('请输入小时数'); return; }
+  const pts = hours * 5;
+  if (totalPoints < pts) { showToast(`积分不够！需要 ${pts} 分`); return; }
+  const { error } = await sb.from('kid_points').insert({ type: 'redeem', category: `看电视${hours}小时`, points: pts, note: '' });
+  if (error) { showToast('❌ 出错了'); return; }
+  totalPoints -= pts;
+  document.getElementById('totalPoints').textContent = totalPoints;
+  document.getElementById('tvHoursInput').value = '';
+  showToast(`📺 已兑换！多看 ${hours} 小时电视 🎉`);
+}
+
+async function customRedeem() {
+  const name = document.getElementById('customRedeemName').value.trim();
+  const pts = parseInt(document.getElementById('customRedeemPts').value);
+  if (!name) { showToast('请输入兑换内容'); return; }
+  if (!pts || pts <= 0) { showToast('请输入分数'); return; }
+  if (totalPoints < pts) { showToast(`积分不够！需要 ${pts} 分`); return; }
+  const { error } = await sb.from('kid_points').insert({ type: 'redeem', category: name, points: pts, note: '' });
+  if (error) { showToast('❌ 出错了'); return; }
+  totalPoints -= pts;
+  document.getElementById('totalPoints').textContent = totalPoints;
+  document.getElementById('customRedeemName').value = '';
+  document.getElementById('customRedeemPts').value = '';
+  showToast(`🎁 已兑换 ${name}！`);
+}
+
+async function loadHistory() {
+  const { data, error } = await sb.from('kid_points').select('*').order('created_at', { ascending: false }).limit(50);
+  if (error) { document.getElementById('historyList').innerHTML = '<div class="loading">加载失败</div>'; return; }
+  if (!data.length) { document.getElementById('historyList').innerHTML = '<div class="loading">暂无记录</div>'; return; }
+  document.getElementById('historyList').innerHTML = data.map(r => {
+    const d = new Date(r.created_at);
+    const timeStr = `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+    return `<div class="history-item">
+      <div class="hi-left">
+        <div class="hi-name">${r.category}</div>
+        <div class="hi-time">${timeStr}</div>
+      </div>
+      <div class="hi-pts ${r.type}">${r.points}</div>
+    </div>`;
+  }).join('');
+}
+
+function switchPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (name === 'history') loadHistory();
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+init();
+</script>
+</body>
+</html>
