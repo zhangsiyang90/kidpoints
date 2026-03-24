@@ -323,39 +323,31 @@ body {
   box-shadow: 0 16px 48px rgba(0,0,0,0.25);
 }
 .pin-title { font-size: 17px; font-weight: 800; margin-bottom: 6px; }
-.pin-subtitle { font-size: 13px; color: #999; margin-bottom: 16px; }
-.pin-text-input {
-  width: 100%;
-  border: 2px solid #eee;
-  border-radius: 14px;
-  padding: 12px 16px;
-  font-size: 16px;
-  text-align: center;
-  letter-spacing: 2px;
+.pin-subtitle { font-size: 13px; color: #999; margin-bottom: 20px; }
+.pin-dots { display: flex; justify-content: center; gap: 14px; margin-bottom: 20px; }
+.pin-dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  background: white;
+  transition: all 0.15s;
 }
-.pin-text-input:focus { outline: none; border-color: #ff6b6b; }
-.pin-cancel-btn {
-  flex: 1;
+.pin-dot.filled { background: #ff6b6b; border-color: #ff6b6b; }
+.pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.pin-key {
   background: #f5f5f5;
-  color: #999;
   border: none;
   border-radius: 14px;
-  padding: 12px;
-  font-size: 15px;
+  padding: 16px;
+  font-size: 22px;
   font-weight: 700;
   cursor: pointer;
+  transition: background 0.1s;
+  color: #333;
 }
-.pin-confirm-btn {
-  flex: 2;
-  background: linear-gradient(135deg, #ff6b6b, #ff8e53);
-  color: white;
-  border: none;
-  border-radius: 14px;
-  padding: 12px;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-}
+.pin-key:active { background: #ffe0e0; }
+.pin-key.del { background: #fff0f0; color: #ff6b6b; font-size: 18px; }
+.pin-key.cancel { background: #f5f5f5; color: #999; font-size: 14px; }
 .pin-error { color: #ff6b6b; font-size: 13px; margin-top: 10px; min-height: 18px; }
 
 /* Behavior score */
@@ -640,11 +632,26 @@ body {
 <div class="pin-overlay" id="pinOverlay">
   <div class="pin-box">
     <div class="pin-title">🔒 家长验证</div>
-    <div class="pin-subtitle">请输入家长密码</div>
-    <input class="pin-text-input" id="pinTextInput" type="password" placeholder="请输入密码" autocomplete="off">
-    <div style="display:flex;gap:10px;margin-top:14px;">
-      <button class="pin-cancel-btn" onclick="pinCancel()">取消</button>
-      <button class="pin-confirm-btn" onclick="pinConfirm()">确认</button>
+    <div class="pin-subtitle">请输入 4 位密码</div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+    </div>
+    <div class="pin-keypad">
+      <button class="pin-key" onclick="pinInput('1')">1</button>
+      <button class="pin-key" onclick="pinInput('2')">2</button>
+      <button class="pin-key" onclick="pinInput('3')">3</button>
+      <button class="pin-key" onclick="pinInput('4')">4</button>
+      <button class="pin-key" onclick="pinInput('5')">5</button>
+      <button class="pin-key" onclick="pinInput('6')">6</button>
+      <button class="pin-key" onclick="pinInput('7')">7</button>
+      <button class="pin-key" onclick="pinInput('8')">8</button>
+      <button class="pin-key" onclick="pinInput('9')">9</button>
+      <button class="pin-key cancel" onclick="pinCancel()">取消</button>
+      <button class="pin-key" onclick="pinInput('0')">0</button>
+      <button class="pin-key del" onclick="pinDelete()">⌫</button>
     </div>
     <div class="pin-error" id="pinError"></div>
   </div>
@@ -656,43 +663,56 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── PIN 系统 ──────────────────────────────────────────────────
-const DEFAULT_PIN = 'xiaoran0213';
+const DEFAULT_PIN = '0213';
 function getPin() { return localStorage.getItem('kidapp_pin') || DEFAULT_PIN; }
 
+let pinBuffer = '';
 let pinCallback = null;
 
 function requirePin(callback) {
+  pinBuffer = '';
   pinCallback = callback;
+  updatePinDots();
   document.getElementById('pinError').textContent = '';
-  document.getElementById('pinTextInput').value = '';
   document.getElementById('pinOverlay').classList.add('show');
-  setTimeout(() => document.getElementById('pinTextInput').focus(), 100);
 }
 
-function pinConfirm() {
-  const val = document.getElementById('pinTextInput').value;
-  if (val === getPin()) {
-    document.getElementById('pinOverlay').classList.remove('show');
-    if (pinCallback) pinCallback();
-    pinCallback = null;
-  } else {
-    document.getElementById('pinError').textContent = '密码错误，请重试';
-    document.getElementById('pinTextInput').value = '';
-    document.getElementById('pinTextInput').focus();
+function pinInput(digit) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += digit;
+  updatePinDots();
+  if (pinBuffer.length === 4) {
+    setTimeout(() => {
+      if (pinBuffer === getPin()) {
+        document.getElementById('pinOverlay').classList.remove('show');
+        if (pinCallback) pinCallback();
+        pinCallback = null;
+      } else {
+        document.getElementById('pinError').textContent = '密码错误，请重试';
+        pinBuffer = '';
+        updatePinDots();
+      }
+    }, 150);
   }
+}
+
+function pinDelete() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updatePinDots();
+  document.getElementById('pinError').textContent = '';
 }
 
 function pinCancel() {
   document.getElementById('pinOverlay').classList.remove('show');
   pinCallback = null;
+  pinBuffer = '';
 }
 
-// 支持回车确认
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('pinTextInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') pinConfirm();
-  });
-});
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('d' + i).classList.toggle('filled', i < pinBuffer.length);
+  }
+}
 
 const DAYS = ['周日','周一','周二','周三','周四','周五','周六'];
 const DAY_TASKS = {
