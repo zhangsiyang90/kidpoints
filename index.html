@@ -421,46 +421,94 @@ body {
 <body>
 
 <div class="header">
-  <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
-  <svg width="52" height="64" viewBox="0 0 52 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- 身体 -->
-    <rect x="14" y="30" width="24" height="22" rx="8" fill="#FFB347"/>
-    <!-- 衬衫条纹 -->
-    <rect x="14" y="35" width="24" height="3" rx="1" fill="#FF7043" opacity="0.6"/>
-    <rect x="14" y="41" width="24" height="3" rx="1" fill="#FF7043" opacity="0.6"/>
-    <!-- 头 -->
-    <ellipse cx="26" cy="20" rx="13" ry="13" fill="#FFDBB5"/>
-    <!-- 头发 -->
-    <ellipse cx="26" cy="10" rx="13" ry="7" fill="#5D4037"/>
-    <ellipse cx="14" cy="16" rx="4" ry="5" fill="#5D4037"/>
-    <ellipse cx="38" cy="16" rx="4" ry="5" fill="#5D4037"/>
-    <!-- 眼睛 -->
-    <ellipse cx="21" cy="20" rx="2.5" ry="3" fill="#333"/>
-    <ellipse cx="31" cy="20" rx="2.5" ry="3" fill="#333"/>
-    <!-- 眼睛高光 -->
-    <circle cx="22" cy="19" r="1" fill="white"/>
-    <circle cx="32" cy="19" r="1" fill="white"/>
-    <!-- 腮红 -->
-    <ellipse cx="17" cy="24" rx="3" ry="2" fill="#FFB3B3" opacity="0.7"/>
-    <ellipse cx="35" cy="24" rx="3" ry="2" fill="#FFB3B3" opacity="0.7"/>
-    <!-- 嘴巴（微笑） -->
-    <path d="M21 26 Q26 30 31 26" stroke="#E57373" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-    <!-- 左手 -->
-    <ellipse cx="9" cy="38" rx="5" ry="4" fill="#FFDBB5" transform="rotate(-20 9 38)"/>
-    <!-- 右手（举起来） -->
-    <ellipse cx="43" cy="32" rx="5" ry="4" fill="#FFDBB5" transform="rotate(30 43 32)"/>
-    <!-- 腿 -->
-    <rect x="16" y="50" width="8" height="12" rx="4" fill="#42A5F5"/>
-    <rect x="28" y="50" width="8" height="12" rx="4" fill="#42A5F5"/>
+  <div style="display:flex;align-items:flex-end;justify-content:center;gap:6px;">
+  <!-- 爸爸 -->
+  <svg width="54" height="72" viewBox="0 0 54 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- 裤子 -->
+    <rect x="15" y="44" width="10" height="22" rx="5" fill="#1565C0"/>
+    <rect x="29" y="44" width="10" height="22" rx="5" fill="#1565C0"/>
     <!-- 鞋 -->
-    <ellipse cx="20" cy="62" rx="5" ry="3" fill="#333"/>
-    <ellipse cx="32" cy="62" rx="5" ry="3" fill="#333"/>
+    <ellipse cx="20" cy="67" rx="6" ry="3.5" fill="#212121"/>
+    <ellipse cx="34" cy="67" rx="6" ry="3.5" fill="#212121"/>
+    <!-- 衬衫 -->
+    <rect x="13" y="28" width="28" height="20" rx="8" fill="#1976D2"/>
+    <!-- 领带 -->
+    <path d="M27 30 L24 44 L27 46 L30 44 Z" fill="#E53935"/>
+    <!-- 衬衫领子 -->
+    <path d="M22 29 L27 34 L32 29" fill="white"/>
+    <!-- 左臂 -->
+    <ellipse cx="8" cy="38" rx="5" ry="7" fill="#1976D2" transform="rotate(10 8 38)"/>
+    <ellipse cx="6" cy="45" rx="4" ry="3.5" fill="#FFDBB5"/>
+    <!-- 右臂（举起） -->
+    <ellipse cx="46" cy="34" rx="5" ry="7" fill="#1976D2" transform="rotate(-20 46 34)"/>
+    <ellipse cx="48" cy="27" rx="4" ry="3.5" fill="#FFDBB5"/>
+    <!-- 头 -->
+    <ellipse cx="27" cy="18" rx="13" ry="13" fill="#FFDBB5"/>
+    <!-- 头发（短） -->
+    <ellipse cx="27" cy="7" rx="12" ry="6" fill="#4E342E"/>
+    <rect x="15" y="7" width="24" height="7" fill="#4E342E"/>
+    <!-- 眉毛 -->
+    <path d="M19 14 Q22 12 25 14" stroke="#4E342E" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path d="M29 14 Q32 12 35 14" stroke="#4E342E" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <!-- 眼睛 -->
+    <ellipse cx="22" cy="18" rx="2.3" ry="2.5" fill="#333"/>
+    <ellipse cx="32" cy="18" rx="2.3" ry="2.5" fill="#333"/>
+    <circle cx="23" cy="17" r="0.9" fill="white"/>
+    <circle cx="33" cy="17" r="0.9" fill="white"/>
+    <!-- 腮红 -->
+    <ellipse cx="17" cy="22" rx="3" ry="2" fill="#FFB3B3" opacity="0.5"/>
+    <ellipse cx="37" cy="22" rx="3" ry="2" fill="#FFB3B3" opacity="0.5"/>
+    <!-- 嘴（微笑） -->
+    <path d="M22 24 Q27 28 32 24" stroke="#E57373" stroke-width="1.5" fill="none" stroke-linecap="round"/>
     <!-- 星星 -->
-    <text x="40" y="12" font-size="10" fill="#FFD700">★</text>
+    <text x="2" y="14" font-size="11" fill="#FFD700">★</text>
   </svg>
-  <div>
+
+  <!-- 标题 -->
+  <div style="text-align:center;padding-bottom:8px;">
     <div class="header-title">⭐ 积分乐园 ⭐</div>
   </div>
+
+  <!-- 妈妈 -->
+  <svg width="54" height="72" viewBox="0 0 54 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- 裙子 -->
+    <path d="M13 38 Q8 60 11 68 L43 68 Q46 60 41 38 Z" fill="#E91E8C"/>
+    <circle cx="20" cy="54" r="3" fill="#F48FB1" opacity="0.55"/>
+    <circle cx="34" cy="48" r="2.5" fill="#F48FB1" opacity="0.55"/>
+    <circle cx="27" cy="60" r="2" fill="#F48FB1" opacity="0.55"/>
+    <!-- 上衣 -->
+    <rect x="15" y="28" width="24" height="14" rx="7" fill="#E91E8C"/>
+    <!-- 左臂 -->
+    <ellipse cx="8" cy="38" rx="5" ry="7" fill="#E91E8C" transform="rotate(10 8 38)"/>
+    <ellipse cx="6" cy="45" rx="4" ry="3.5" fill="#FFDBB5"/>
+    <!-- 右臂（举起） -->
+    <ellipse cx="46" cy="34" rx="5" ry="7" fill="#E91E8C" transform="rotate(-20 46 34)"/>
+    <ellipse cx="48" cy="27" rx="4" ry="3.5" fill="#FFDBB5"/>
+    <!-- 头 -->
+    <ellipse cx="27" cy="18" rx="13" ry="13" fill="#FFDBB5"/>
+    <!-- 头发 -->
+    <ellipse cx="27" cy="8" rx="13" ry="7" fill="#3E2723"/>
+    <path d="M14 13 Q10 24 13 32 Q15 25 14 13Z" fill="#3E2723"/>
+    <path d="M40 13 Q44 24 41 32 Q39 25 40 13Z" fill="#3E2723"/>
+    <ellipse cx="27" cy="10" rx="11" ry="5" fill="#3E2723"/>
+    <!-- 睫毛 -->
+    <path d="M19 14.5 L17.5 13" stroke="#333" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M22 14 L22 12.5" stroke="#333" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M30 14.5 L31.5 13" stroke="#333" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M33 14 L33 12.5" stroke="#333" stroke-width="1.2" stroke-linecap="round"/>
+    <!-- 眼睛 -->
+    <ellipse cx="22" cy="18" rx="2.2" ry="2.6" fill="#333"/>
+    <ellipse cx="32" cy="18" rx="2.2" ry="2.6" fill="#333"/>
+    <circle cx="22.8" cy="17" r="0.9" fill="white"/>
+    <circle cx="32.8" cy="17" r="0.9" fill="white"/>
+    <!-- 腮红 -->
+    <ellipse cx="17" cy="22" rx="3" ry="2" fill="#FFB3B3" opacity="0.7"/>
+    <ellipse cx="37" cy="22" rx="3" ry="2" fill="#FFB3B3" opacity="0.7"/>
+    <!-- 嘴 -->
+    <path d="M22 24 Q27 28 32 24" stroke="#E57373" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <!-- 爱心 -->
+    <text x="40" y="13" font-size="11" fill="#ff6b6b">♥</text>
+  </svg>
 </div>
   <div class="header-sub">好好学习，天天向上！</div>
   <div class="points-display">
@@ -599,50 +647,6 @@ body {
 
 <!-- 兑换页 -->
 <div id="page-redeem" class="page">
-  <!-- 页头 -->
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:0 4px;">
-    <div style="font-size:22px;font-weight:900;color:#333;">🎁 积分兑换</div>
-    <!-- 妈妈 SVG -->
-    <svg width="54" height="68" viewBox="0 0 54 68" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- 裙子 -->
-      <path d="M10 36 Q5 58 8 64 L46 64 Q49 58 44 36 Z" fill="#E91E8C"/>
-      <!-- 裙子花纹 -->
-      <circle cx="20" cy="50" r="3" fill="#F48FB1" opacity="0.6"/>
-      <circle cx="34" cy="44" r="2.5" fill="#F48FB1" opacity="0.6"/>
-      <circle cx="27" cy="56" r="2" fill="#F48FB1" opacity="0.6"/>
-      <!-- 上衣 -->
-      <rect x="15" y="28" width="24" height="12" rx="6" fill="#E91E8C"/>
-      <!-- 头 -->
-      <ellipse cx="27" cy="18" rx="13" ry="13" fill="#FFDBB5"/>
-      <!-- 头发 -->
-      <ellipse cx="27" cy="8" rx="13" ry="7" fill="#3E2723"/>
-      <path d="M14 14 Q10 22 13 30 Q15 24 14 14Z" fill="#3E2723"/>
-      <path d="M40 14 Q44 22 41 30 Q39 24 40 14Z" fill="#3E2723"/>
-      <!-- 刘海 -->
-      <ellipse cx="27" cy="10" rx="11" ry="5" fill="#3E2723"/>
-      <!-- 眼睛 -->
-      <ellipse cx="22" cy="18" rx="2.2" ry="2.6" fill="#333"/>
-      <ellipse cx="32" cy="18" rx="2.2" ry="2.6" fill="#333"/>
-      <circle cx="22.8" cy="17" r="0.9" fill="white"/>
-      <circle cx="32.8" cy="17" r="0.9" fill="white"/>
-      <!-- 睫毛 -->
-      <path d="M19.5 15.5 L18 14" stroke="#333" stroke-width="1" stroke-linecap="round"/>
-      <path d="M22 15 L22 13.5" stroke="#333" stroke-width="1" stroke-linecap="round"/>
-      <path d="M29.5 15.5 L28 14" stroke="#333" stroke-width="1" stroke-linecap="round"/>
-      <path d="M32 15 L32 13.5" stroke="#333" stroke-width="1" stroke-linecap="round"/>
-      <!-- 腮红 -->
-      <ellipse cx="17.5" cy="21" rx="3" ry="2" fill="#FFB3B3" opacity="0.7"/>
-      <ellipse cx="36.5" cy="21" rx="3" ry="2" fill="#FFB3B3" opacity="0.7"/>
-      <!-- 嘴 -->
-      <path d="M22 24 Q27 27.5 32 24" stroke="#E57373" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-      <!-- 手 -->
-      <ellipse cx="9" cy="40" rx="5" ry="4" fill="#FFDBB5" transform="rotate(15 9 40)"/>
-      <ellipse cx="45" cy="40" rx="5" ry="4" fill="#FFDBB5" transform="rotate(-15 45 40)"/>
-      <!-- 爱心 -->
-      <text x="38" y="14" font-size="10" fill="#ff6b6b">♥</text>
-    </svg>
-  </div>
-
   <!-- 计时器 -->
   <div class="timer-card" id="timerCard">
     <div class="timer-title">📺 今日免费看电视</div>
