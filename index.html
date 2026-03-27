@@ -581,11 +581,11 @@ body {
       <span class="var-card-icon">📝</span>
       <span class="var-card-title">周二听写 · 背单词</span>
     </div>
-    <div class="var-card-desc">每答对一个单词 +1分，输入答对数量</div>
+    <div class="var-card-desc">每答对一个单词 +2分，输入答对数量</div>
     <div class="var-row">
       <input class="var-input" id="spellingInput" type="number" min="0" max="50" placeholder="0">
       <span class="var-unit">个词</span>
-      <button class="var-submit" onclick="addVarPoints('spellingInput', 1, '听写背单词')">确认</button>
+      <button class="var-submit" onclick="addVarPoints('spellingInput', 2, '听写背单词')">确认</button>
     </div>
   </div>
 
@@ -715,7 +715,7 @@ body {
     <h4>📅 周一</h4>
     <ul>
       <li>完成英语作业 +5分</li>
-      <li>背单词（周二听写，每对一词 +1分）</li>
+      <li>背单词（周二听写，每对一词 +2分）</li>
     </ul>
   </div>
   <div class="rule-box">
@@ -857,7 +857,7 @@ function updatePinDots() {
 const DAYS = ['周日','周一','周二','周三','周四','周五','周六'];
 const DAY_TASKS = {
   1: { label: '周一 · 英语日', tasks: ['完成英语作业（+5分）', '提前背单词，周二听写按答对数计分'] },
-  2: { label: '周二 · 语文日 + 听写日', tasks: ['完成语文作业（+5分）', '听写测验（每答对一词+1分）'] },
+  2: { label: '周二 · 语文日 + 听写日', tasks: ['完成语文作业（+5分）', '听写测验（每答对一词+2分）'] },
   3: { label: '周三 · 语文课', tasks: ['语文课（+10分）'] },
   4: { label: '周四 · 英语课', tasks: ['英语课（+10分）'] },
   5: { label: '周五 · 练习册', tasks: ['每完成一页练习册 +2分'] },
